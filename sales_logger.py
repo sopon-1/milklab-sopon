@@ -65,33 +65,54 @@ def append_to_sheet(menu: str, qty: int, price: float) -> dict:
 
 
 def send_notification(message: str) -> str:
-    """TODO 2: ส่ง message ไปยัง Telegram bot (ใช้ TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)
-    หรือ LINE bot (ใช้ LINE_CHANNEL_TOKEN) เลือกตัวใดตัวหนึ่ง
+    """ส่ง message ไปยัง Telegram bot หรือ LINE Messaging API"""
+    telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    line_token = os.environ.get("LINE_CHANNEL_TOKEN")
+    line_user_id = os.environ.get("LINE_USER_ID")
 
-    Returns: provider name ที่ใช้ ("telegram" หรือ "line")
-    Raises RuntimeError ถ้า no credentials
-    """
-    token = os.environ.get("TELEGRAM_BOT_TOKEN")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    # 1. เช็กฝั่ง Telegram
+    if telegram_token and telegram_chat_id:
+        url = f"https://api.telegram.com/bot{telegram_token}/sendMessage"
+        payload = {"chat_id": telegram_chat_id, "text": message}
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                return "telegram"
+            else:
+                raise RuntimeError(
+                    f"Telegram API ส่งไม่สำเร็จ: {response.text}")
+        except Exception as e:
+            raise RuntimeError(f"เกิดข้อผิดพลาดในการเชื่อมต่อ Telegram: {e}")
 
-    if not token or not chat_id:
+    # 2. เช็กฝั่ง LINE Messaging API (Push Message)
+    elif line_token and line_user_id:
+        url = "https://api.line.me/v2/bot/message/push"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {line_token}"
+        }
+        payload = {
+            "to": line_user_id,
+            "messages": [
+                {
+                    "type": "text",
+                    "text": message
+                }
+            ]
+        }
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            if response.status_code == 200:
+                return "line"
+            else:
+                raise RuntimeError(f"LINE API ส่งไม่สำเร็จ: {response.text}")
+        except Exception as e:
+            raise RuntimeError(f"เกิดข้อผิดพลาดในการเชื่อมต่อ LINE: {e}")
+
+    else:
         raise RuntimeError(
-            "ไม่พบ TELEGRAM_BOT_TOKEN หรือ TELEGRAM_CHAT_ID ใน Environment")
-
-    url = f"https://api.telegram.com/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message
-    }
-
-    try:
-        response = requests.post(url, json=payload)
-        if response.status_code == 200:
-            return "telegram"
-        else:
-            raise RuntimeError(f"Telegram API ส่งไม่สำเร็จ: {response.text}")
-    except Exception as e:
-        raise RuntimeError(f"เกิดข้อผิดพลาดในการเชื่อมต่อ Telegram: {e}")
+            "ไม่พบการตั้งค่าแจ้งเตือน (ต้องมี TELEGRAM_BOT_TOKEN+CHAT_ID หรือ LINE_CHANNEL_TOKEN+LINE_USER_ID)")
 
 
 def main() -> int:
@@ -118,7 +139,7 @@ def main() -> int:
     except Exception as exc:
         print(
             f"[WARN] บันทึก Sheet สำเร็จแต่ส่งแจ้งเตือนล้มเหลว: {exc}", file=sys.stderr)
-        return 0
+        raise exc
 
     print(f"[OK] บันทึกและแจ้งเตือนผ่าน {provider} เรียบร้อย ยอด {total} บาท")
     return 0
