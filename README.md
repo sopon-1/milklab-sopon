@@ -2,7 +2,7 @@
 title: MilkLab RAG Chatbot
 emoji: 🥛
 colorFrom: blue
-colorTo: milk
+colorTo: gray
 sdk: streamlit
 sdk_version: "1.35.0"
 python_version: "3.11"
