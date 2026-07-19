@@ -1,0 +1,15 @@
+2026-07-19 15:20 | user_input | บันทึกขายนมหมี 2 ขวด ขวดละ 65
+2026-07-19 15:20 | llm_response | {"tool": "log_sale", "args": {"menu": "นมหมีฮอกไกโด", "qty": 2, "price": 65}}
+2026-07-19 15:20 | tool_result | OK: row appended at 2026-07-19T15:20:12+07 | บันทึกแล้วยอด 130 บาท
+2026-07-19 15:22 | user_input | ขอดูยอดขายของวันที่ 2026-07-19 หน่อย
+2026-07-19 15:22 | llm_response | {"tool": "query_sales", "args": {"date": "2026-07-19"}}
+2026-07-19 15:22 | tool_result | OK: ยอดขายของวันที่ 2026-07-19 มียอดรวมสะสมอยู่ที่ 1,250 บาท
+2026-07-19 15:23 | user_input | แจ้งเตือนด่วนว่าระบบสต็อกมีปัญหา
+2026-07-19 15:23 | llm_response | {"tool": "send_alert", "args": {"message": "ระบบสต็อกมีปัญหา"}}
+2026-07-19 15:23 | tool_result | OK: แจ้งเตือนข้อความด่วนผ่าน telegram เรียบร้อย
+2026-07-19 15:25 | user_input | บันทึกขายนมจืด 5 ขวด ราคาขวดละ 40
+2026-07-19 15:25 | llm_response | {"tool": "log_sale", "args": {"menu": "นมจืด", "qty": 5, "price": 40}}
+2026-07-19 15:25 | tool_result | OK: row appended at 2026-07-19T15:25:44+07 | บันทึกแล้วยอด 200 บาท
+2026-07-19 15:28 | user_input | บันทึกขายนมหมี -2 ขวด ขวดละ 65
+2026-07-19 15:28 | llm_response | {"tool": "log_sale", "args": {"menu": "นมหมีฮอกไกโด", "qty": -2, "price": 65}}
+2026-07-19 15:28 | tool_result | [FAIL] Guardrail: ValueError - Quantity and price must be positive values
