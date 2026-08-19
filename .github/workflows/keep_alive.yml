@@ -1,0 +1,16 @@
+name: Keep App Alive
+
+on:
+  schedule:
+    # รันทุกวันเวลา 00:00 UTC (ประมาณ 07:00 น. เวลาไทย)
+    - cron: '0 0 * * *'
+  workflow_dispatch: # เปิดให้กดรันเองแบบ Manual ได้ด้วย
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit App
+        run: |
+          curl -s https://milklab-sopon-e2rhwqyebdlgfteg8hxip5.streamlit.app/ > /dev/null
+          echo "Pinged Streamlit App successfully!"
