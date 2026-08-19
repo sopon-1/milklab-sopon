@@ -26,7 +26,7 @@ def load_index():
     model = SentenceTransformer(
         'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
 
-    kb_path = "menu_kb.md"
+    kb_path = "musiclab_kb.md"
     if not os.path.exists(kb_path):
         raise FileNotFoundError(f"ไม่พบไฟล์ {kb_path} กรุณาตรวจสอบตำแหน่งไฟล์")
 
@@ -61,17 +61,17 @@ def generate_answer(query: str, context_chunks: list[str]) -> str:
     """ส่ง query + context ไป Gemini, return answer"""
     context_text = "\n---\n".join(context_chunks)
 
-    prompt = f"""คุณคือ "น้องมิลค์" AI สาวน้อยประจำร้าน MilkLab 🥛✨ 
-บุคลิกน่ารัก สดใส เป็นกันเอง และพูดจาลงท้ายด้วย "นะคะ/ค่ะ" หรือคำว่า "น้า~" อย่างสุภาพและน่าเอ็นดู
+    prompt = f"""คุณคือ "น้องจูน" AI ผู้ช่วยสุดน่ารักและรักเสียงดนตรีประจำร้าน MusicLab 🎸✨
+บุคลิกเป็นกันเอง ร่าเริง มีความรู้เรื่องเครื่องดนตรี และพูดจาลงท้ายด้วย "นะคะ/ค่ะ" หรือคำว่า "น้า~" อย่างสุภาพและน่าเอ็นดู
 
 หน้าที่ของคุณคือช่วยตอบคำถามลูกค้า โดยอ้างอิงข้อมูลจาก [Context] ด้านล่างนี้เท่านั้น:
 
 [คำแนะนำในการตอบคำถาม]:
-1. วิเคราะห์ความเชื่อมโยงของส่วนผสมอย่างชาญฉลาด เช่น:
-   - "Lactose (แลคโตส)" คือน้ำตาลชนิดหนึ่งตามธรรมชาติในนมวัว หากลูกค้าถามถึง "น้ำตาล" หรือ "เมนูไม่มีน้ำตาล" ให้เชื่อมโยงข้อมูลเรื่อง Lactose มาตอบให้ลูกค้าเข้าใจด้วยนะคะ
-   - หากลูกค้าถามเรื่องสารก่อภูมิแพ้หรือส่วนผสม ให้เชื่อมโยงคำที่เกี่ยวข้องจาก Context ได้ค่ะ (เช่น กลูเตน = แป้งสาลี)
+1. วิเคราะห์ความเชื่อมโยงของวัสดุและส่วนประกอบอย่างชาญฉลาด เช่น:
+   - "Nickel (นิกเกิล)" เป็นส่วนประกอบทั่วไปในสายกีตาร์ไฟฟ้า หากลูกค้าถามถึงอาการ "แพ้โลหะ" หรือถามหา "สายกีตาร์สำหรับคนแพ้ง่าย" ให้เชื่อมโยงและแนะนำให้เลือกสายเคลือบ (Coated Strings) หรือ Stainless Steel ตามข้อมูลที่มีใน Context เพื่อความปลอดภัยของลูกค้านะคะ
+   - หากลูกค้าถามเรื่องค่าบริการเปลี่ยนสายหรือการเซ็ตอัพ ให้เชื่อมโยงราคาสินค้าหรือบริการที่เกี่ยวข้องจาก Context มาตอบได้เลยค่ะ
 2. หากไม่พบข้อมูลใน Context เลยจริงๆ ให้ตอบอย่างน่ารักว่า "ขออภัยด้วยน้าา ทางร้านยังไม่มีข้อมูลส่วนนี้ในระบบเลยค่ะ 🥺"
-3. ห้ามมโนหรือคิดส่วนผสมขึ้นมาเองเด็ดขาดหากไม่มีใน Context
+3. ห้ามมโนหรือคิดรุ่นของสินค้า/ราคาขึ้นมาเองเด็ดขาดหากไม่มีระบุไว้ใน Context
 
 [Context]
 {context_text}
@@ -89,10 +89,10 @@ def generate_answer(query: str, context_chunks: list[str]) -> str:
 
 
 def main():
-    st.set_page_config(page_title="MilkLab° RAG", page_icon="🥛")
-    st.title("MilkLab° RAG Chatbot 🍓🥛")
+    st.set_page_config(page_title="MusicLab° RAG", page_icon="🎸")
+    st.title("MusicLab° RAG Chatbot 🎸🎶")
     st.caption(
-        "ถามอะไรเกี่ยวกับ MilkLab ได้เลยน้า~ น้องมิลค์พร้อมตอบจาก menu_kb.md ค่ะ!")
+        "ถามอะไรเกี่ยวกับ MusicLab ได้เลยน้า~ น้องจูนพร้อมตอบจาก musiclab_kb.md ค่ะ!")
 
     try:
         model, index, chunks = load_index()
@@ -110,13 +110,13 @@ def main():
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("ถามน้องมิลค์ได้เลยนะคะ..."):
+    if prompt := st.chat_input("ถามน้องจูนได้เลยนะคะ..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("น้องมิลค์กำลังเปิดสมุดค้นข้อมูลให้นะคะ... ✨"):
+            with st.spinner("น้องจูนกำลังเปิดสมุดค้นข้อมูลให้นะคะ... ✨"):
                 context = retrieve_top_k(prompt, model, index, chunks)
                 answer = generate_answer(prompt, context)
             st.write(answer)

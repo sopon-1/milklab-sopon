@@ -1,13 +1,11 @@
-"""MilkLab Sales Logger (S2).
+"""MusicLab Sales Logger (S2).
 
 Usage:
-    python sales_logger.py --menu "นมหมีฮอกไกโด" --qty 2 --price 65
+    python sales_logger.py --item "สายกีตาร์โปร่ง" --qty 2 --price 250
 
 Reads GOOGLE_SHEETS_CREDENTIALS and TELEGRAM_BOT_TOKEN (or LINE_CHANNEL_TOKEN) from env.
-Appends row [timestamp, menu, qty, price, total] to a Google Sheet,
+Appends row [timestamp, item, qty, price, total] to a Google Sheet,
 then sends a notification via Telegram or LINE bot.
-
-นักศึกษาต้องเติม TODO ใน 4 จุดด้านล่างใน Session 2 Lab 1.3
 """
 
 import argparse
@@ -23,10 +21,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def append_to_sheet(menu: str, qty: int, price: float) -> dict:
-    """TODO 1: ใช้ gspread เปิด Sheet ของตัวเอง แล้ว append_row ด้วย [timestamp, menu, qty, price, total]
+def append_to_sheet(item: str, qty: int, price: float) -> dict:
+    """ใช้ gspread เปิด Sheet ของตัวเอง แล้ว append_row ด้วย [timestamp, item, qty, price, total]
 
-    Returns dict {timestamp, menu, qty, price, total} ที่ append แล้ว
+    Returns dict {timestamp, item, qty, price, total} ที่ append แล้ว
     Raises RuntimeError ถ้า credentials ไม่มี หรือ Sheet ไม่ accessible
     """
     creds_json = os.environ.get("GOOGLE_SHEETS_CREDENTIALS")
@@ -50,12 +48,12 @@ def append_to_sheet(menu: str, qty: int, price: float) -> dict:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         total = qty * price
 
-        row_data = [timestamp, menu, qty, price, total]
+        row_data = [timestamp, item, qty, price, total]
         worksheet.append_row(row_data)
 
         return {
             "timestamp": timestamp,
-            "menu": menu,
+            "item": item,
             "qty": qty,
             "price": price,
             "total": total
@@ -116,16 +114,15 @@ def send_notification(message: str) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="MilkLab Sales Logger")
-    parser.add_argument("--menu", required=True, help="ชื่อเมนู")
-    parser.add_argument("--qty", type=int, required=True, help="จำนวนขวด")
+    parser = argparse.ArgumentParser(description="MusicLab Sales Logger")
+    parser.add_argument("--item", required=True, help="ชื่อสินค้าหรือบริการ")
+    parser.add_argument("--qty", type=int, required=True, help="จำนวน")
     parser.add_argument("--price", type=float,
-                        required=True, help="ราคาต่อขวด")
+                        required=True, help="ราคาต่อหน่วย")
     args = parser.parse_args()
 
     try:
-        # TODO 3: เรียก append_to_sheet แล้ว extract total
-        row = append_to_sheet(args.menu, args.qty, args.price)
+        row = append_to_sheet(args.item, args.qty, args.price)
         total = row["total"]
     except Exception as exc:
         print(f"[ERROR] บันทึก Sheet ล้มเหลว: {exc}", file=sys.stderr)
@@ -133,9 +130,8 @@ def main() -> int:
         return 1
 
     try:
-        # TODO 4: เรียก send_notification ด้วย message ที่บอกยอดที่บันทึก
         provider = send_notification(
-            f"🔔 บันทึกยอดขายยอดขายสำเร็จ!\n📝 เมนู: {args.menu}\n📦 จำนวน: {args.qty} ขวด\n💰 ยอดรวม: {total} บาท")
+            f"🎸 บันทึกยอดขาย MusicLab° สำเร็จ!\n📝 สินค้า/บริการ: {args.item}\n📦 จำนวน: {args.qty} ชิ้น\n💰 ยอดรวม: {total} บาท")
     except Exception as exc:
         print(
             f"[WARN] บันทึก Sheet สำเร็จแต่ส่งแจ้งเตือนล้มเหลว: {exc}", file=sys.stderr)

@@ -21,15 +21,15 @@ from google.genai import types
 TOOL_SCHEMA = [
     {
         "name": "log_sale",
-        "description": "บันทึกการขายลง Google Sheets และส่ง notification",
+        "description": "บันทึกการขายเครื่องดนตรี อะไหล่ หรือบริการลง Google Sheets และส่ง notification",
         "parameters": {
             "type": "object",
             "properties": {
-                "menu": {"type": "string", "description": "ชื่อเมนู"},
+                "item": {"type": "string", "description": "ชื่อสินค้าหรือบริการ"},
                 "qty": {"type": "integer", "description": "จำนวนที่ขาย"},
                 "price": {"type": "number", "description": "ราคาต่อหน่วย"},
             },
-            "required": ["menu", "qty", "price"],
+            "required": ["item", "qty", "price"],
         },
     },
     {
@@ -110,6 +110,8 @@ def parse_command(cmd: str, api_key: str | None = None) -> dict:
             ),
         )
 
+        print(f"[DEBUG RESPONSE] {response}")
+
         function_calls = response.function_calls
         if not function_calls:
             raise RuntimeError("โมเดลไม่ได้เลือกฟังก์ชันใดๆ")
@@ -135,7 +137,7 @@ def dispatch_tool(tool_call: dict) -> str:
     args = tool_call.get("args", {})
 
     if tool_name == "log_sale":
-        menu = args.get("menu")
+        item = args.get("item")
         qty = args.get("qty")
         price = args.get("price")
 
@@ -143,7 +145,7 @@ def dispatch_tool(tool_call: dict) -> str:
             # เรียกใช้สคริปต์ของ Session 2 Lab 1.3 ผ่าน Subprocess
             cmd_args = [
                 sys.executable, "sales_logger.py",
-                "--menu", str(menu),
+                "--item", str(item),
                 "--qty", str(qty),
                 "--price", str(price)
             ]
@@ -161,7 +163,7 @@ def dispatch_tool(tool_call: dict) -> str:
 
     elif tool_name == "query_sales":
         date_str = args.get("date")
-        return f"OK: ยอดขายของวันที่ {date_str} มียอดรวมสะสมอยู่ที่ 1,250 บาท (นมหมี 10 ขวด, นมจืด 5 ขวด)"
+        return f"OK: ยอดขายของวันที่ {date_str} มียอดรวมสะสมอยู่ที่ 1,250 บาท (สายกีตาร์ 5 ชิ้น, กีตาร์โปร่ง 1 ตัว)"
 
     elif tool_name == "send_alert":
         message = args.get("message")
