@@ -14,22 +14,22 @@ from google import genai
 
 
 PROMPT_TEMPLATE = """\
-คุณคือ social media manager ของร้าน MilkLab° ร้านนมสดกลางคืน
+คุณคือ social media manager ของร้าน MusicLab° ร้านขายเครื่องดนตรี อะไหล่ และบริการ Setup กีตาร์
 
-จงเขียนแคปชั่นภาษาไทย 2 ถึง 3 ประโยคโปรโมตเมนู: {menu}
+จงเขียนแคปชั่นภาษาไทย 2 ถึง 3 ประโยคเพื่อโปรโมตสินค้าหรือบริการ: {menu}
 
 เงื่อนไข:
-- โทนสนุก ใช้คำง่าย ใส่ emoji ได้
-- ต้องมี call-to-action ปิดท้าย เช่น สั่งเลย หรือ ทักแชท
+- ใช้โทนตื่นเต้น เป็นมิตร เข้าใจความรู้สึกของนักดนตรี ใส่ emoji ที่เกี่ยวกับดนตรีได้ (เช่น 🎸, 🎶, ⚡)
+- ต้องมี call-to-action ปิดท้าย เช่น ทักแชทสอบถาม หรือ จองคิวเลย
 - ห้ามใช้ em dash
 """
 
 
 def generate_caption(menu: str, api_key: str | None = None) -> str:
     """Generate a Thai caption for the given milk menu item."""
-    key = api_key or os.environ.get("GOOGLE_API_KEY")
+    key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     if not key:
-        raise RuntimeError("GOOGLE_API_KEY not set in env or argument")
+        raise RuntimeError("ไม่พบ GEMINI_API_KEY หรือ GOOGLE_API_KEY ใน Environment")
     client = genai.Client(api_key=key)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -40,7 +40,7 @@ def generate_caption(menu: str, api_key: str | None = None) -> str:
 
 def main() -> int:
     load_dotenv()
-    menu = input("เมนูที่จะโปรโมต: ").strip()
+    menu = input("สินค้าหรือบริการที่จะโปรโมต (เช่น สายกีตาร์โปร่ง Ernie Ball): ").strip()
     if not menu:
         print("กรุณาใส่ชื่อเมนู")
         return 1
